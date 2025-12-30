@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>$DUCK Frenzy</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+body {
+  margin: 0;
+  background: #ffc0cb;
+  font-family: Arial;
+  overflow: hidden;
+}
+#duck {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  font-size: 48px;
+  transform: translateX(-50%);
+}
+.item {
+  position: absolute;
+  font-size: 32px;
+}
+#hud {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+<div id="hud">Score: 0 | Lives: 3</div>
+<div id="duck">🦆</div>
+
+<script>
+Telegram.WebApp.ready();
+
+let duck = document.getElementById("duck");
+let score = 0;
+let lives = 3;
+let duckX = window.innerWidth / 2;
+
+document.addEventListener("touchmove", e => {
+  duckX = e.touches[0].clientX;
+  duck.style.left = duckX + "px";
+});
+
+function spawn() {
+  let item = document.createElement("div");
+  item.className = "item";
+  let types = ["🍕","🍦","🏹"];
+  item.textContent = types[Math.floor(Math.random()*types.length)];
+  item.style.left = Math.random() * (window.innerWidth - 30) + "px";
+  document.body.appendChild(item);
+
+  let y = 0;
+  let fall = setInterval(() => {
+    y += 6;
+    item.style.top = y + "px";
+
+    let d = duck.getBoundingClientRect();
+    let i = item.getBoundingClientRect();
+
+    if (i.bottom > d.top && i.left < d.right && i.right > d.left) {
+      if (item.textContent === "🏹") {
+        lives--;
+      } else {
+        score += 10;
+      }
+      updateHUD();
+      clearInterval(fall);
+      item.remove();
+    }
+
+    if (y > window.innerHeight) {
+      clearInterval(fall);
+      item.remove();
+    }
+  }, 30);
+}
+
+function updateHUD() {
+  document.getElementById("hud").innerText =
+    `Score: ${score} | Lives: ${lives}`;
+  if (lives <= 0) {
+    alert("🦆 Game Over! Score: " + score);
+    Telegram.WebApp.close();
+  }
+}
+
+setInterval(spawn, 900);
+</script>
+</body>
+</html>
