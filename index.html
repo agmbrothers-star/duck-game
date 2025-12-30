@@ -42,12 +42,28 @@ let duck = document.getElementById("duck");
 let score = 0;
 let lives = 3;
 let duckX = window.innerWidth / 2;
+duck.style.left = duckX + "px";
 
-document.addEventListener("touchmove", e => {
-  duckX = e.touches[0].clientX;
+// DESKTOP CONTROLS
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") duckX -= 40;
+  if (e.key === "ArrowRight") duckX += 40;
+
+  duckX = Math.max(0, Math.min(window.innerWidth - 50, duckX));
   duck.style.left = duckX + "px";
 });
 
+// MOBILE / TELEGRAM CONTROLS
+document.addEventListener("touchmove", e => {
+  duckX = e.touches[0].clientX - 25;
+  duck.style.left = duckX + "px";
+});
+
+// MOBILE / TELEGRAM CONTROLS
+document.addEventListener("touchmove", e => {
+  duckX = e.touches[0].clientX - 25;
+  duck.style.left = duckX + "px";
+});
 function spawn() {
   let item = document.createElement("div");
   item.className = "item";
