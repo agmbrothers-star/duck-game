@@ -1,91 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>$DUCK Frenzy</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body {
-  margin: 0;
-  background: #ffc0cb;
-  font-family: Arial;
-  overflow: hidden;
-}
-#duck {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  font-size: 48px;
-  transform: translateX(-50%);
-}
-.item {
-  position: absolute;
-  font-size: 32px;
-}
-#hud {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  font-size: 18px;
-}
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: #ffc0cb;
+    font-family: Arial, sans-serif;
+  }
+
+  #hud {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    font-size: 18px;
+    z-index: 10;
+  }
+
+  #duck {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 48px;
+    user-select: none;
+  }
+
+  .item {
+    position: fixed;
+    top: -40px;
+    font-size: 32px;
+  }
 </style>
 </head>
 
 <body>
+
 <div id="hud">Score: 0 | Lives: 3</div>
 <div id="duck">🦆</div>
 
 <script>
-Telegram.WebApp.ready();
-
 let duck = document.getElementById("duck");
+let hud = document.getElementById("hud");
+
 let score = 0;
 let lives = 3;
-let duckX = window.innerWidth / 2;
-duck.style.left = duckX + "px";
 
-// DESKTOP CONTROLS
-document.addEventListener("keydown", e => {
+let duckX = window.innerWidth / 2;
+
+// ✅ DESKTOP CONTROLS
+document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") duckX -= 40;
   if (e.key === "ArrowRight") duckX += 40;
 
-  duckX = Math.max(0, Math.min(window.innerWidth - 50, duckX));
+  duckX = Math.max(20, Math.min(window.innerWidth - 20, duckX));
   duck.style.left = duckX + "px";
 });
 
-// MOBILE / TELEGRAM CONTROLS
-document.addEventListener("touchmove", e => {
-  duckX = e.touches[0].clientX - 25;
+// ✅ MOBILE / TELEGRAM TOUCH CONTROLS
+document.addEventListener("touchmove", (e) => {
+  duckX = e.touches[0].clientX;
   duck.style.left = duckX + "px";
-});
+}, { passive: false });
 
-// MOBILE / TELEGRAM CONTROLS
-document.addEventListener("touchmove", e => {
-  duckX = e.touches[0].clientX - 25;
-  duck.style.left = duckX + "px";
-});
-function spawn() {
+// 🔽 SPAWN ITEMS
+function spawnItem() {
   let item = document.createElement("div");
   item.className = "item";
-  let types = ["🍕","🍦","🏹"];
-  item.textContent = types[Math.floor(Math.random()*types.length)];
-  item.style.left = Math.random() * (window.innerWidth - 30) + "px";
+
+  let types = ["🍕", "🍦", "🏹"];
+  item.textContent = types[Math.floor(Math.random() * types.length)];
+
+  item.style.left = Math.random() * (window.innerWidth - 40) + "px";
   document.body.appendChild(item);
 
-  let y = 0;
+  let y = -40;
+
   let fall = setInterval(() => {
     y += 6;
     item.style.top = y + "px";
 
-    let d = duck.getBoundingClientRect();
-    let i = item.getBoundingClientRect();
+    let duckRect = duck.getBoundingClientRect();
+    let itemRect = item.getBoundingClientRect();
 
-    if (i.bottom > d.top && i.left < d.right && i.right > d.left) {
+    if (
+      itemRect.bottom > duckRect.top &&
+      itemRect.left < duckRect.right &&
+      itemRect.right > duckRect.left
+    ) {
       if (item.textContent === "🏹") {
         lives--;
       } else {
         score += 10;
       }
+
       updateHUD();
       clearInterval(fall);
       item.remove();
@@ -99,15 +111,15 @@ function spawn() {
 }
 
 function updateHUD() {
-  document.getElementById("hud").innerText =
-    `Score: ${score} | Lives: ${lives}`;
+  hud.innerText = `Score: ${score} | Lives: ${lives}`;
   if (lives <= 0) {
     alert("🦆 Game Over! Score: " + score);
-    Telegram.WebApp.close();
+    location.reload();
   }
 }
 
-setInterval(spawn, 900);
+setInterval(spawnItem, 900);
 </script>
+
 </body>
 </html>
